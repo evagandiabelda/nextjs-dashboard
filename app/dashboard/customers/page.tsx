@@ -1,9 +1,25 @@
+import { lusitana } from '@/app/ui/fonts';
 import { Metadata } from "next";
+import CustomersTable from '@/app/ui/customers/table';
+import { fetchFilteredCustomers } from '@/app/lib/data';
 
 export const metadata: Metadata = {
     title: 'Customers',
 };
 
-export default function Page() {
-    return <p>Customers Page</p>;
+export default async function Page(props: {
+    searchParams?: Promise<{
+        query?: string;
+        page?: string;
+    }>;
+}) {
+    const searchParams = await props.searchParams;
+    const query = searchParams?.query || '';
+    const customers = await fetchFilteredCustomers(query);
+
+    return (
+        <div className="w-full">
+            <CustomersTable customers={customers} />
+        </div>
+    );
 }
