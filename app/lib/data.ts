@@ -217,28 +217,3 @@ export async function fetchFilteredCustomers(query: string) {
     throw new Error('Failed to fetch customer table.');
   }
 }
-
-export async function fetchFormattedCustomers() {
-  try {
-    const data = await sql<FormattedCustomersTable[]>`
-      SELECT
-        customers.id,
-        customers.name,
-        customers.email,
-        customers.image_url,
-        COUNT(invoices.id) AS total_invoices,
-        COALESCE(SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END), 0) AS total_pending,
-        COALESCE(SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END), 0) AS total_paid
-      FROM customers
-      LEFT JOIN invoices ON customers.id = invoices.customer_id
-      GROUP BY customers.id, customers.name, customers.email, customers.image_url, customers.total_invoices, customers.total_pending, customers.total_paid
-      ORDER BY customers.name ASC
-    `;
-
-    const customers = data.rows;
-    return customers;
-  } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch customer table.');
-  }
-}
